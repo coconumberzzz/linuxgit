@@ -114,7 +114,6 @@ f=list(dic.keys())              #dic.keys를 리스트로 변환하고자 할때
 print(f)
 print(dic.values())             #value 리스트
 print(dic.items())              #key,value 쌍얻기
-
 print(dic.get('name'))          #key로 value얻기
 print('name' in dic)            #해당키가 딕셔너리안에 있는지 조사
 #>>True
