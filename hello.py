@@ -60,3 +60,26 @@ print(a[2:])                    #[3,4,5]
 print(a+b)                      #리스트 더하기
 print(a*3)                      #리스트 곱하기
 print(len(a))                   #리스트 길이
+
+a[2]=4                          #수정
+print(a)
+del a[3]                        #위치삭제
+print(a)
+a.append(3)                     #추가
+print(a)
+a.sort()                        #정렬
+print(a)
+a.reverse()                     #역순(리스트 자체) 
+print(a)
+a.insert(0,0)                   #삽입(변경)
+print(a)
+a.remove(4)                     #지정삭제
+print(a)
+a.pop()                         #마지막요소반환 및 삭제
+print(a)
+a.pop(1)                        #위치반환(a[1]반환)
+print(a)
+a.extend([1,4])                 #리스트확장
+print(a)
+a.sort()
+print(a)
