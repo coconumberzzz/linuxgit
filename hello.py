@@ -121,3 +121,5 @@ print('email' in dic)
 #>>False
 dic.clear()                     #쌍 지우기
 print(dic)
+
+
