@@ -139,8 +139,6 @@ def tutorStudentProcess():
 @app.route("/tutorCalendar",methods=["POST","GET"])
 #_튜터>달력
 def tutorCalendar():
-    if 'username' in session:
-        result = '%s'%escape (session['username'])
         db = pymysql.connect(host='127.0.0.1',
           port=3306,
           user='admin',
@@ -148,38 +146,26 @@ def tutorCalendar():
           db='attendance',
           charset='utf8')
         cursor=db.cursor()
-        query = "SELECT TUTOR_ID FROM TUTOR_INFO WHERE EMAIL = %s"
-        value = (result)
-        cursor.execute(query,value)
-        key = (cursor.fetchall())
         
-        for row in key :
-            key = row[0]
+       #튜터>달력
+        query="SELECT CLASS_INFO.CLASS_ID,CLASS_NAME,CLASS_TIME,DATE FROM ATTENDANCE,CLASS_INFO,TUTEE_CLASS_MAPPING WHERE TUTOR_ID=%s AND CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID"
+        value=(key)
+        cursor.execute(query,value)
+        data3=(cursor.fetchall())
 
-        if key:
-           #튜터>달력
-            query="SELECT CLASS_INFO.CLASS_ID,CLASS_NAME,CLASS_TIME,DATE FROM ATTENDANCE,CLASS_INFO,TUTEE_CLASS_MAPPING WHERE TUTOR_ID=%s AND CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID"
-            value=(key)
-            cursor.execute(query,value)
-            data3=(cursor.fetchall())
-
-            datalist=[]
+        datalist=[]
             
-            for row in data3:
-                if row :        #튜터마이페이지 > 캘린더
-                    dic={'CLASS_ID/NAME/TIME/DATE':row[0:]}
-                    datalist.append(dic)
-            DATA={'CLASS_ID,NAME,TIME,DATE':'%s'%datalist}
-            i = json.dumps(DATA)
-            loaded_i = json.loads(i)
-            cursor.close()
-            db.close()
-            return loaded_i
-    else: #튜터 아닐시
-        error = {'error':'error!error!error!'}
-        r = json.dumps(error)
-        loaded_r = json.loads(r)
-        return loaded_r
+        for row in data3:
+            if row :        #튜터마이페이지 > 캘린더
+                dic={'class_id':row[0],'class_name':row[1],'class_time':row[2],'date':row[3]}
+                datalist.append(dic)
+        DATA={'calendar':datalist}
+        i = json.dumps(DATA)
+        loaded_i = json.loads(i)
+        cursor.close()
+        db.close()
+        return loaded_i
+
 @app.route("/tutorOgraph",methods=["POST","GET"])
 def tutorOgraph():
     return render_template('tutor_mypage.html')

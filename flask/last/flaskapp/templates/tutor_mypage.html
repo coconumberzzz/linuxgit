@@ -120,19 +120,18 @@
                 dataType:"json",
                 method:'POST',
                 success : function(json){
-                  $.each(json,function(index, dic){
-			  alert(Object.keys(dic));
-                  	var addA = document.createElement('a');
-                  	addA.className = 'collapse-item'
-                  	addA.href = `http://192.168.88.139:5000/tutorMypage?class_id=${dic[0]['NAME'][1]}`
-                  	addA.innerText = `${dic[0]['NAME'][0]}`
-			$(".start").after(addA);
-                      });
+			var json_length=Object.keys(json['class_info']).length;
+			for(var i=0; i < json_length; i++){
+				var addA= document.createElement('a');
+				addA.className = 'collapse-item'
+                  		addA.href = `http://192.168.88.139:5000/tutorMypage?class_id=${json['class_info'][i]['ID']}`
+					  addA.innerText = `${json['class_info'][i]['NAME']}`
+				$(".start").after(addA);
+			}
                     }
                   });
                 })
             </script>
-            <a class="collapse-item" name="class_name" href="http://192.168.88.139:5000/tutorMypage?class_id=1">네트워크 보안</a>
           </div>
         </div>
       </li>
