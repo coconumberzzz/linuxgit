@@ -113,7 +113,7 @@ def tutorStudentProcess():
 
                 for row in data2:
                     if row :        #튜터마이페이지 > 학생목록
-                        dic={'TUTEENAME':row[0],'ENGAGEMENT':row[1],'STATUS':row[2]}
+                        dic={'tutee_name':row[0],'engagement':row[1],'status':row[2]}
                         datalist.append(dic)
                 DATA={'studentList':datalist}
                 i = json.dumps(DATA)
@@ -135,36 +135,59 @@ def tutorStudentProcess():
             loaded_r = json.loads(r)
             return redirect(url_for("login",error=loaded_r))
 
-
-@app.route("/tutorCalendar",methods=["POST","GET"])
+@app.route("/tutorCalendarProcess",methods=["POST","GET"])
 #_튜터>달력
 def tutorCalendar():
-        db = pymysql.connect(host='127.0.0.1',
-          port=3306,
-          user='admin',
-          passwd='0507',
-          db='attendance',
-          charset='utf8')
-        cursor=db.cursor()
-        
-       #튜터>달력
-        query="SELECT CLASS_INFO.CLASS_ID,CLASS_NAME,CLASS_TIME,DATE FROM ATTENDANCE,CLASS_INFO,TUTEE_CLASS_MAPPING WHERE TUTOR_ID=%s AND CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID"
-        value=(key)
-        cursor.execute(query,value)
-        data3=(cursor.fetchall())
+    if 'username' in session:
+            result = '%s'%escape (session['username'])
+            db = pymysql.connect(host='127.0.0.1',
+            port=3306,
+            user='admin',
+            passwd='0507',
+            db='attendance',
+            charset='utf8')
+            cursor=db.cursor()
+            query = "SELECT TUTOR_ID FROM TUTOR_INFO WHERE EMAIL = %s"
+            value = (result)
+            cursor.execute(query,value)
+            key = (cursor.fetchall())   #tutor_id
+            for row in key :
+                if row :
+                    key = row[0]
+            if key:
+                #튜터>달력
+                query="SELECT CLASS_INFO.CLASS_ID,CLASS_NAME,CLASS_TIME,DATE FROM ATTENDANCE,CLASS_INFO,TUTEE_CLASS_MAPPING WHERE TUTOR_ID=%s AND CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID"
+                value=(key)
+                cursor.execute(query,value)
+                data3=(cursor.fetchall())
 
-        datalist=[]
+                datalist=[]
             
-        for row in data3:
-            if row :        #튜터마이페이지 > 캘린더
-                dic={'class_id':row[0],'class_name':row[1],'class_time':row[2],'date':row[3]}
-                datalist.append(dic)
-        DATA={'calendar':datalist}
-        i = json.dumps(DATA)
-        loaded_i = json.loads(i)
-        cursor.close()
-        db.close()
-        return loaded_i
+                for row in data3:
+                    if row :        #튜터마이페이지 > 캘린더
+                        dic={'class_id':row[0],'class_name':row[1],'class_time':row[2],'date':row[3]}
+                    datalist.append(dic)
+                DATA={'calendar':datalist}
+                i = json.dumps(DATA)
+                loaded_i = json.loads(i)
+                cursor.close()
+                db.close()
+                return loaded_i
+            else :
+                error = {'error':'error!error!error!'}
+                r = json.dumps(error)
+                loaded_r = json.loads(r)
+                cursor.close()
+                db.close()
+                return redirect(url_for("index",error=loaded_r))
+
+    else: #로그인 안됐을때 접근제한 처리
+        error = {'error':'error!error!error!'}
+        r = json.dumps(error)
+        loaded_r = json.loads(r)
+        return redirect(url_for("login",error=loaded_r))
+
+
 
 @app.route("/tutorOgraph",methods=["POST","GET"])
 def tutorOgraph():
