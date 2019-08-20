@@ -12,12 +12,19 @@ def befor_request():
     app.permanent_session_lifetime=timedelta(minutes=30)
 
 @app.route("/")
+
 @app.route("/<error>")
 def index(error=None):
   return'%s' %error
+
 @app.route("/tutorMypage")
 def tutorMypage():
   return render_template('tutor_mypage.html')
+
+@app.route("/tutorStudent")
+def tutorStudent():
+    return render_template('tutor_mypage.html')
+
 
 @app.route("/tutorMypageProcess",methods=["POST","GET"])
 #_튜터>강의목록
@@ -72,61 +79,61 @@ def tutorMypageProcess():
         loaded_r = json.loads(r)
         return redirect(url_for("login",error=loaded_r))
 
-@app.route("/tutorStudent",methods=["POST","GET"])
+@app.route("/tutorStudentProcess",methods=["POST","GET"])
 #_튜터>학생목록
-def tutorStudent():
-    if 'username' in session:
-        result = '%s'%escape (session['username'])
-        db = pymysql.connect(host='127.0.0.1',
-          port=3306,
-          user='admin',
-          passwd='0507',
-          db='attendance',
-          charset='utf8')
-        cursor=db.cursor()
-        query = "SELECT TUTOR_ID FROM TUTOR_INFO WHERE EMAIL = %s" 
-        value = (result)
-        cursor.execute(query,value)
-        key = (cursor.fetchall())
+def tutorStudentProcess():
+    if request.method == "GET":
+        class_id=request.args.get("class_id")
+        if 'username' in session:
+            result = '%s'%escape (session['username'])
+            db = pymysql.connect(host='127.0.0.1',
+            port=3306,
+            user='admin',
+            passwd='0507',
+            db='attendance',
+            charset='utf8')
+            cursor=db.cursor()
+            query = "SELECT TUTOR_ID FROM TUTOR_INFO WHERE EMAIL = %s" 
+            value = (result)
+            cursor.execute(query,value)
+            key = (cursor.fetchall())
         
-        for row in key :
-            if row :
-                key = row[0]
+            for row in key :
+                if row :
+                    key = row[0]
 
-        if key:
-          #튜터>학생목록
-            query="SELECT TUTEE_INFO.NAME,ENEGAGEMENT,STATUS FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO,TUTEE_INFO WHERE CLASS_INFO.CLASS_ID=%s AND CLASS_INFO.TUTOR_ID=%s AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.TUTEE_ID=TUTEE_INFO.TUTEE_ID"
-            value(key)
-            #value=(class_id,key)
-            cursor.execute(query)
-            data2=(cursor.fetchall())
-            
-            datalist=[]
+            if key:
+              #튜터>학생목록
+                query="SELECT TUTEE_INFO.NAME,ENGAGEMENT,STATUS FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO,TUTEE_INFO WHERE CLASS_INFO.CLASS_ID=%s AND CLASS_INFO.TUTOR_ID=%s AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.TUTEE_ID=TUTEE_INFO.TUTEE_ID AND CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID;"
+                value=(class_id,key)
+                cursor.execute(query,value)
+                data2=(cursor.fetchall())
+                
+                datalist=[]
 
-            for row in data2:
-                if row :        #튜터마이페이지 > 학생목록
-                    dic={'TUTEENAME':row[0:],'ENGAGEMENT':row[0:],'STATUS':row[0:]}
-                    datalist.append(dic)
-            DATA={'STUDENT_NAME':datalist}
-            i = json.dumps(DATA)
-            loaded_i = json.loads(i)
-            cursor.close()
-            db.close()
-            return loaded_i
-        else : 
+                for row in data2:
+                    if row :        #튜터마이페이지 > 학생목록
+                        dic={'TUTEENAME':row[0],'ENGAGEMENT':row[1],'STATUS':row[2]}
+                        datalist.append(dic)
+                DATA={'studentList':datalist}
+                i = json.dumps(DATA)
+                loaded_i = json.loads(i)
+                cursor.close()
+                db.close()
+                return loaded_i
+            else : 
+                error = {'error':'error!error!error!'}
+                r = json.dumps(error)
+                loaded_r = json.loads(r)
+                cursor.close()
+                db.close()
+                return redirect(url_for("index",error=loaded_r))
+
+        else: #로그인 안됐을때 접근제한 처리
             error = {'error':'error!error!error!'}
             r = json.dumps(error)
             loaded_r = json.loads(r)
-            cursor.close()
-            db.close()
-            return loaded_r
-
-    else: #로그인 안됐을때 접근제한 처리
-        error = {'error':'error!error!error!'}
-        r = json.dumps(error)
-        loaded_r = json.loads(r)
-        return loaded_r
-
+            return redirect(url_for("login",error=loaded_r))
 
 
 @app.route("/tutorCalendar",methods=["POST","GET"])
@@ -292,8 +299,12 @@ def tutorOgraph():
             return loaded_i
 
 @app.route("/tutorLgraph",methods=["POST","GET"])
-#_튜터>평균그래프(각 인원수)
 def tutorLgraph():
+    return render_template('tutor_mypage.html')
+
+@app.route("/tutorLgraphProcess",methods=["POST","GET"])
+#_튜터>평균그래프(각 인원수)
+def tutorLgraphProcess():
     db = pymysql.connect(host='127.0.0.1',
         port=3306,
         user='admin',
@@ -302,23 +313,29 @@ def tutorLgraph():
         charset='utf8')
     cursor=db.cursor()
 
+    class_id=request.args.get("class_id")
+    tutee_id=request.args.get("tutee_id")
+
+
     #튜터>출결현황그래프>날짜(최신,달력)
     query = "SELECT max(DATE) FROM ATTENDANCE WHERE DATE IN (SELECT max(DATE) FROM ATTENDANCE)"
     cursor.execute(query)
-    data8=(cursor.fetchall())
-
+    key=(cursor.fetchall())
+    print(key)
     #튜터>평균그래프
-    query = "SELECT CLASS_INFO.CLASS_TIME,ATTENDANCE.PASS_TIME FROM ATTENDANCE,CLASS_INFO,TUTEE_CLASS_MAPPING WHERE CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID AND ATTENDANCE.MAPPING_ID=TUTEE_CLASS_MAPPING.MAPPING_ID AND ATTENDANCE.DATE=%s AND TUTEE_CLASS_MAPPING.TUTEE_ID='1'"
-    value=(data8)
+    query = "SELECT CLASS_INFO.CLASS_TIME,ATTENDANCE.PASS_TIME FROM ATTENDANCE,CLASS_INFO,TUTEE_CLASS_MAPPING WHERE CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID AND ATTENDANCE.MAPPING_ID=TUTEE_CLASS_MAPPING.MAPPING_ID AND ATTENDANCE.DATE=%s AND TUTEE_CLASS_MAPPING.TUTEE_ID=%s AND CLASS_INFO.CLASS_ID=%s"
+    value=(key,tutee_id,class_id)
     cursor.execute(query,value)
     data12=(cursor.fetchall())
+    print(data12)
     datalist=[]
     for row in data12:
         if row :
-            dic ={'CLASS_INFO.CLASS_TIME':row[0:],'ATTENDANCE.PASS_TIME':row[0:]}
+            dic ={'CLASS_INFO.CLASS_TIME':row[0],'ATTENDANCE.PASS_TIME':row[1]}
             datalist.append(dic)
     
-    i = json.dumps(data8)
+    DATA={'student_graph':datalist}
+    i = json.dumps(DATA)
     loaded_i=json.loads(i)
     cursor.close()
     db.close()
@@ -415,7 +432,11 @@ def sessionCheck():
     else:
         return redirect(url_for('login'))
 
-
+@app.route("/logout")
+def logout():
+    if 'username' in session:
+        session.pop('username',None)
+        return redirect(url_for('index'))
 
 @app.route("/tuteeMypage",methods=["POST","GET"])
 def tutee_lecture():
