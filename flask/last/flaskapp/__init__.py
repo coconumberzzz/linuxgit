@@ -232,7 +232,7 @@ def tutorCalendar():
 
         value=(class_id)
         cursor.execute(query,value)
-        data3=(cursor.fetchall())   #지각인원
+        data3=(cursor.fetchall())   #결석인원
         datalist=[]
 
         for row in data3:
@@ -246,24 +246,6 @@ def tutorCalendar():
         cursor.close()
         db.close()
         return loaded_i
-
-
-
-
-@app.route("/tutorOgraph",methods=["POST","GET"])
-def tutorOgraph():
-    return render_template('tutor_mypage.html')
-
-@app.route("/graph2",methods=["GET"])
-def graph2():
-    passlist=[75]
-    latelist=[20]
-    faillist=[5]
-
-    dic ={'pass':passlist[0:],'late':latelist[0:],'fail':faillist[0:]}
-    i = json.dumps(dic)
-    loaded_i=json.loads(i)
-    return loaded_i
 
 
 @app.route("/tutorOgraphProcess",methods=["POST","GET"])
@@ -429,11 +411,6 @@ def graph():
     loaded_i=json.loads(i)
     return loaded_i
 
-
-@app.route("/tutorLgraph",methods=["POST","GET"])
-def tutorLgraph():
-    return render_template('tutor_mypage.html')
-
 @app.route("/tutorLgraphProcess",methods=["POST","GET"])
 #_튜터>평균그래프(각 인원수)
 def tutorLgraphProcess():
@@ -572,52 +549,3 @@ def logout():
         session.pop('username',None)
         return redirect(url_for('index'))
 
-@app.route("/tuteeMypage",methods=["POST","GET"])
-def tutee_lecture():
-    if 'username' in session:
-        result = '%s'%escape (session['username'])
-        db = pymysql.connect(host='127.0.0.1',
-          port=3306,
-          user='admin',
-          passwd='0507',
-          db='attendance',
-          charset='utf8')
-        cursor=db.cursor()
-        query = "SELECT TUTEE_ID FROM TUTOR_INFO WHERE EMAIL = %s" 
-        value = (result)
-        cursor.execute(query,value)
-        key = (cursor.fetchall())
-        
-        for row in key :
-            key = row[0]
-
-        if key:
-            #튜티>강의목록
-            query = "SELECT CLASS_INFO.CLASS_NAME FROM CLASS_INFO,TUTEE_INFO,TUTEE_CLASS_MAPPING WHERE TUTEE_INFO.TUTEE_ID=TUTEE_CLASS_MAPPING.TUTEE_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID;"
-            cursor.execute(query)
-            data=(cursor.fetchall())
-
-            datalist=[]       
-            for row in data:
-                if row :  #튜티마이페이지 > 강의목록
-                    dic={'CLASS_NAME':row[0:]}
-                    datalist.append(dic)
-            DATA={'CLASS_NAME':'%s'%datalist}
-            i = json.dumps(DATA)
-            loaded_i = json.loads(DATA)
-            cursor.close()
-            db.close()
-            return loaded_i
-        else : 
-            error = {'error':'error!error!error!'}
-            r = json.dumps(error)
-            loaded_r = json.loads(r)
-            cursor.close()
-            db.close()
-            return loaded_r
-
-    else: #로그인 안됐을때 접근제한 처리
-        error = {'error':'error!error!error!'}
-        r = json.dumps(error)
-        loaded_r = json.loads(r)
-        return loaded_r

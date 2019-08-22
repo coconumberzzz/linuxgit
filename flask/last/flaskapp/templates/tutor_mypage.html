@@ -485,16 +485,16 @@
                     // Pie Chart Example
                     $(function(){
                       $.ajax({
-                        url:'http://192.168.88.140:5000/graph2',
+                        url:'http://192.168.88.140:5000/tutorOgraphProcess',
                         method:'GET',
                         dataType:'json',
                         data:{class_id:1},
                         })
                         .done(function(json){
                           var datas = [];
-                          datas.push(`${json['pass'][0]}`);
-                          datas.push(`${json['late'][0]}`);
-                          datas.push(`${json['fail'][0]}`);
+                          datas.push(`${json['my_graph'][4]['pass %']}`);
+			  datas.push(`${json['my_graph'][5]['late %']}`);
+		       	datas.push(`${json['my_graph'][6]['fail %']}`);
                         var ctx = document.getElementById("myPieChart");
                         var myPieChart = new Chart(ctx, {
                           type: 'doughnut',
@@ -538,19 +538,48 @@
                     </span>
                   </div>
                 </div>
-                <div class="pie_table_">
-                  <table class="pie_table">
-                    <thead>
-                      <tr>
-                        <td></td>
-                        <td>인원</td>
-                        <td>퍼센트(%)</td>
-                      </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                  </table>
-                </div>
+		<div class="pie_table_">
+  <script>
+    $(function(){
+      $.ajax({
+        url:'http://192.168.88.140:5000/tutorOgraphProcess',
+        dataType:'json',
+        method:'GET',
+        data:{class_id:1},
+      })
+      .done(function(json){
+          $('#pie > tbody:last').append(
+              '<tr><th>' + '출석' + '</th>' +
+                '<td>' + `${json["my_graph"][0]["pass"]}` + '</td>' +
+                '<td>' + `${json["my_graph"][4]["pass %"]}` + '%</td></tr>');
+          $('#pie > tbody:last').append(
+              '<tr><th>' + '지각' + '</th>' +
+                '<td>' + `${json["my_graph"][1]["late"]}`+ '</td>' +
+                '<td>' + `${json["my_graph"][5]["late %"]}` + '%</td></tr>');
+          $('#pie > tbody:last').append(
+              '<tr><th>' + '결석' + '</th>' +
+                '<td>' + `${json["my_graph"][2]["fail"]}` + '</td>' +
+                '<td>' + `${json["my_graph"][6]["fail %"]}` + '%</td></tr>');
+          $('#pie > tbody:last').append(
+              '<tr><th>' + '총 인원' + '</th>' +
+                '<td>' + `${json["my_graph"][3]["all"]}` + '</td>' +
+                '<td>' + `${json["my_graph"][7]["all %"]}` + '%</td></tr>');
+        })
+      })
+  </script>
+  <table class="pie_table" id="pie">
+    <thead>
+      <tr>
+        <td></td>
+        <th>인원</th>
+        <th>퍼센트(%)</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</div>
+
               </div>
             </div>
             <div class="col-lg-8 mb-4">
