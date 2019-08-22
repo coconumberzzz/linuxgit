@@ -248,7 +248,7 @@
                     $.ajax({
                       url:'http://192.168.88.140:5000/tutorLgraphProcess',
                       dataType:'json',
-                      method:'POST',
+                      method:'GET',
                       data:{
                         class_id:class_id,
                         tutee_id:tutee_id
@@ -279,13 +279,13 @@
                 <div class="card-header py-3">
                   <h6 class="m-0 font-weight-bold text-primary">학생 리스트</h6>
                 </div>
-                <script>
-                  $(function(){
+            <script>
+              $(function(){
                     $.ajax({
                       dataType:'json',
-                      method:'POST',
+                      method:'GET',
                       url:'http://192.168.88.140:5000/tutorStudentProcess',
-                      data:{class_id:class_id},
+                      data:{class_id:1},
                       success: function(json){
                         var num = Object.keys(json).length;
                         for(var i=0;i<num;i++){
@@ -300,11 +300,11 @@
                           addTDnum.className = 'number'
                           addTDimg.className = `image`
                           addTDimg.innerText = `<img style="width:20px;height:20px" src="../static/img/user.jpg"/>`
-                          addTDname.innerText= `${json[studentList][i]['tutee_name']}`
+                          addTDname.innerText= `${json["studentList"][i]['tutee_name']}`
                           addTDname.className = `name`
-                          addTDenga.innerText= `${json[studentList][i]['engagement']}`
+                          addTDenga.innerText= `${json["studentList"][i]['engagement']}`
                           addTDenga.className = `enga`
-                          addTDstatus.innerText=`${json[studentList][i]['status']}`
+                          addTDstatus.innerText=`${json["studentList"][i]['status']}`
                           $('tbody').append(addTR);
                           $(`.tr_start_${i}`).append(addTDnum);
                           $('.number').append(addTDimg);
