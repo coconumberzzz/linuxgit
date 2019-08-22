@@ -19,10 +19,22 @@ def index(error=None):
 
 @app.route("/tutorMypage")
 def tutorMypage():
-  return render_template('tutor_mypage.html')
+    if 'username' in session:
+        result = '%s'%escape (session['username'])
+        return render_template('tutor_mypage.html')
+    else :
+        return render_template('index.html')
 
 @app.route("/tutorStudent")
 def tutorStudent():
+    if 'username' in session:
+        result = '%s'%escape (session['username'])
+        return render_template('tutor_mypage.html')
+    else :
+        return render_template('index.html')
+
+@app.route("/tutorInfo")
+def tutorInfo():
     return render_template('tutor_mypage.html')
 
 
@@ -135,57 +147,106 @@ def tutorStudentProcess():
             loaded_r = json.loads(r)
             return redirect(url_for("login",error=loaded_r))
 
-@app.route("/tutorCalendarProcess",methods=["POST","GET"])
-#_튜터>달력
-def tutorCalendar():
-    if 'username' in session:
-            result = '%s'%escape (session['username'])
-            db = pymysql.connect(host='127.0.0.1',
+@app.route("/tutorInfoProcess",methods=["POST","GET"])
+#_튜터>강의
+def tutorInfoProcess():
+    class_id=request.args.get("class_id")
+    db = pymysql.connect(host='127.0.0.1',
             port=3306,
             user='admin',
             passwd='0507',
             db='attendance',
             charset='utf8')
-            cursor=db.cursor()
-            query = "SELECT TUTOR_ID FROM TUTOR_INFO WHERE EMAIL = %s"
-            value = (result)
-            cursor.execute(query,value)
-            key = (cursor.fetchall())   #tutor_id
-            for row in key :
-                if row :
-                    key = row[0]
-            if key:
-                #튜터>달력
-                query="SELECT CLASS_INFO.CLASS_ID,CLASS_NAME,CLASS_TIME,DATE FROM ATTENDANCE,CLASS_INFO,TUTEE_CLASS_MAPPING WHERE TUTOR_ID=%s AND CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID"
-                value=(key)
-                cursor.execute(query,value)
-                data3=(cursor.fetchall())
+    cursor=db.cursor()
 
-                datalist=[]
-            
-                for row in data3:
-                    if row :        #튜터마이페이지 > 캘린더
-                        dic={'class_id':row[0],'class_name':row[1],'class_time':row[2],'date':row[3]}
-                    datalist.append(dic)
-                DATA={'calendar':datalist}
-                i = json.dumps(DATA)
-                loaded_i = json.loads(i)
-                cursor.close()
-                db.close()
-                return loaded_i
-            else :
-                error = {'error':'error!error!error!'}
-                r = json.dumps(error)
-                loaded_r = json.loads(r)
-                cursor.close()
-                db.close()
-                return redirect(url_for("index",error=loaded_r))
 
-    else: #로그인 안됐을때 접근제한 처리
-        error = {'error':'error!error!error!'}
-        r = json.dumps(error)
-        loaded_r = json.loads(r)
-        return redirect(url_for("login",error=loaded_r))
+    query="SELECT CLASS_NAME FROM CLASS_INFO WHERE CLASS_ID =%s"
+    value=(class_id)
+    cursor.execute(query,value)
+    data14=(cursor.fetchall())
+
+    datalist=[]
+    for row in data14:
+        if row :        #튜터마이페이지 > 강의목록
+            dic={'class_name':row[0]}
+            datalist.append(dic)
+
+            DATA={'class_info':datalist}
+            i = json.dumps(DATA)
+            loaded_i = json.loads(i)
+            cursor.close()
+            db.close()
+            return loaded_i
+        else :
+            error = {'error':'error!error!error!'}
+            r = json.dumps(error)
+            loaded_r = json.loads(r)
+            cursor.close()
+            db.close()
+            return redirect(url_for("index",error=loaded_r))
+
+
+@app.route("/tutorCalendarProcess",methods=["POST","GET"])
+#_튜터>달력
+def tutorCalendar():
+        db = pymysql.connect(host='127.0.0.1',
+            port=3306,
+            user='admin',
+            passwd='0507',
+            db='attendance',
+            charset='utf8')
+        cursor=db.cursor()
+        #튜터>달력
+        
+        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'pass~~' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
+        value=(class_id)
+        cursor.execute(query,value)
+        data=(cursor.fetchall())   #출석인원
+        datalist=[]
+
+        for row in data:
+            if row :        #캘린더
+                dic={'pass':row[0],'date':row[1]}
+                datalist.append(dic)
+        DATA={'calendar':datalist}
+        i = json.dumps(DATA)
+        loaded_i = json.loads(i)
+
+
+        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'LATE' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
+
+        value=(class_id)
+        cursor.execute(query,value)
+        data2=(cursor.fetchall())   #지각인원
+        datalist=[]
+
+        for row in data2:
+            if row :        #캘린더
+                dic={'late':row[0],'date':row[1]}
+                datalist.append(dic)
+        DATA={'calendar':datalist}
+        i = json.dumps(DATA)
+        loaded_i = json.loads(i)
+
+        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'FAIL' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
+
+        value=(class_id)
+        cursor.execute(query,value)
+        data3=(cursor.fetchall())   #지각인원
+        datalist=[]
+
+        for row in data3:
+            if row :        #캘린더
+                dic={'fail':row[0],'date':row[1]}
+                datalist.append(dic)
+        DATA={'calendar':datalist}
+        i = json.dumps(DATA)
+        loaded_i = json.loads(i)
+   
+        cursor.close()
+        db.close()
+        return loaded_i
+
 
 
 
@@ -346,10 +407,15 @@ def tutorOgraphProcess():
         db.close()
         return loaded_i
 
+@app.route("/graph",methods=["GET"])
+def graph():
+    datalist=[0,1,2,2,2,1,2,2,0,1]
+    datatime=["9:00","9:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30"]
 
-
-
-
+    dic ={'data':datalist[0:],'time':datatime[0:]} 
+    i = json.dumps(dic)
+    loaded_i=json.loads(i)
+    return loaded_i
 
 
 @app.route("/tutorLgraph",methods=["POST","GET"])
@@ -376,6 +442,8 @@ def tutorLgraphProcess():
     cursor.execute(query)
     data8=(cursor.fetchall())
     print(data8)
+
+
     #튜터>평균그래프
     query = "SELECT CLASS_INFO.CLASS_TIME,ATTENDANCE.PASS_TIME FROM ATTENDANCE,CLASS_INFO,TUTEE_CLASS_MAPPING WHERE CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID AND ATTENDANCE.MAPPING_ID=TUTEE_CLASS_MAPPING.MAPPING_ID AND ATTENDANCE.DATE=%s AND TUTEE_CLASS_MAPPING.TUTEE_ID=%s AND CLASS_INFO.CLASS_ID=%s"
     value=(data8,tutee_id,class_id)
