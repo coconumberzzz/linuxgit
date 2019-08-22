@@ -198,8 +198,8 @@ def tutorCalendar():
         cursor=db.cursor()
         #튜터>달력
         
-        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'pass' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
-        value=(class_id)
+        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'pass' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
+        value=(1)
         cursor.execute(query,value)
         data=(cursor.fetchall())   #출석인원
         datalist=[]
@@ -208,41 +208,32 @@ def tutorCalendar():
             if row :        #캘린더
                 dic={'pass':row[0],'date':row[1]}
                 datalist.append(dic)
-        DATA={'calendar':datalist}
-        i = json.dumps(DATA)
-        loaded_i = json.loads(i)
 
 
-        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'late' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
+        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'late' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
 
-        value=(class_id)
+        value=(1)
         cursor.execute(query,value)
         data2=(cursor.fetchall())   #지각인원
-        datalist=[]
-
+        
         for row in data2:
             if row :        #캘린더
                 dic={'late':row[0],'date':row[1]}
                 datalist.append(dic)
-        DATA={'calendar':datalist}
-        i = json.dumps(DATA)
-        loaded_i = json.loads(i)
 
-        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'fail' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
+        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'fail' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
 
-        value=(class_id)
+        value=(1)
         cursor.execute(query,value)
         data3=(cursor.fetchall())   #결석인원
-        datalist=[]
 
         for row in data3:
             if row :        #캘린더
                 dic={'fail':row[0],'date':row[1]}
                 datalist.append(dic)
-        DATA={'calendar':datalist}
+        DATA = {'calendar':datalist}
         i = json.dumps(DATA)
         loaded_i = json.loads(i)
-   
         cursor.close()
         db.close()
         return loaded_i
@@ -430,8 +421,6 @@ def tutorLgraphProcess():
     query = "SELECT max(DATE) FROM ATTENDANCE WHERE DATE IN (SELECT max(DATE) FROM ATTENDANCE)"
     cursor.execute(query)
     data8=(cursor.fetchall())
-    print(data8)
-
 
     #튜터>평균그래프
     query = "SELECT CLASS_INFO.CLASS_TIME,ATTENDANCE.PASS_TIME FROM ATTENDANCE,CLASS_INFO,TUTEE_CLASS_MAPPING WHERE CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID AND ATTENDANCE.MAPPING_ID=TUTEE_CLASS_MAPPING.MAPPING_ID AND ATTENDANCE.DATE=%s AND TUTEE_CLASS_MAPPING.TUTEE_ID=%s AND CLASS_INFO.CLASS_ID=%s"
@@ -440,10 +429,14 @@ def tutorLgraphProcess():
     data12=(cursor.fetchall())
     print(data12)
     datalist=[]
+    class_time_list = []
+    pass_time_list = []
     for row in data12:
         if row :
-            dic ={'class_time':row[0],'pass_time':row[1]}
-            datalist.append(dic)
+            class_time_list = row[0].split(',')
+            pass_time_list = row[1].split(',')
+    dic ={'class_time':class_time_list,'pass_time':pass_time_list}
+    datalist.append(dic)
     
     DATA={'student_graph':datalist}
     i = json.dumps(DATA)
