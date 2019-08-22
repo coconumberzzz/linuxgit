@@ -121,11 +121,21 @@
                   		addA.href = `http://192.168.88.140:5000/tutorMypage?class_id=${json['class_info'][i]['ID']}`
 					  addA.innerText = `${json['class_info'][i]['NAME']}`
 				$(".start").after(addA);
-			}
+			$(document).html('<input type="hidden" name="class_id" value=""'+json["class_info"][i]['class_id']+'"></input>"');
+                                         }
+                       localStorage.lect_id = `${json['class_info'][0]['class_id']}`;
                     }
                   });
                 })
             </script>
+	    <script>
+              $(function(){
+                  $('.collapse-item').on('click','a',function(){
+                    lect_id = $('.class_id').val();
+                  })
+              });
+            </script>
+
           </div>
         </div>
       </li>
@@ -152,12 +162,26 @@
         <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
           <!-- Sidebar Toggle (Topbar) -->
-          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-            <i class="fa fa-bars"></i>
-          </button>
 
           <!-- Topbar Search -->
           <h1 class="h3 mb-0 text-gray-800" name="class_name"> 강의 이름 / 분반</h1>
+          <script>
+            $(function(){
+              var lect_id = localStorage.lect_id;
+              $.ajax({
+                url:'http://192.168.88.140:5000/tutorInfoProcess',
+                method:'GET',
+                dataType:'json',
+                async:false,
+                data:{
+                  class_id : lect_id
+                }
+              })
+              .done(function(json){
+                $('#Class_Name').after(`${json["class_info"][0]['class_name']}`)
+              })
+            })
+          </script>
 
           <!-- Topbar Navbar -->
           <ul class="navbar-nav ml-auto">
@@ -236,12 +260,9 @@
                   <div class="dropdown no-arrow">
                   </div>
                 </div>
-                <!-- Card Body -->
-
-		
+                <!-- Card Body -->		
 		<div class="card-body">
                   <div class="chart-area">
-                   
 		<script>
                     // Set new default font family and font color to mimic Bootstrap's default styling
                     $(function(){
@@ -275,13 +296,15 @@
                     })
                     // Area Chart Example
                     $(function(){
+                      var lect_id = localStorage.lect_id;
+                      var student_id = localStorage.student_id;
                       $.ajax({
-	  		url:'http://192.168.88.140:5000/graph',
+	  		url:'http://192.168.88.140:5000/tutorLgraphProcess',
                         dataType:'json',
                         method:'GET',
                         data:{
-                          class_id : 1,
-                          tutee_id : 1
+                          class_id : lect_id,
+                          tutee_id : student_id
                         },
                         success : function(json){
                           var ctx = document.getElementById("myAreaChart");
@@ -291,11 +314,11 @@
 			  var datas = [];
 			  for(var i=0; i < time_length; i++) {
 			  	times.push(`${json['time'][i]}`);
-				  datas.push(`${json['data'][i]}`);
+				datas.push(`${json['data'][i]}`);
 		  	  }
                           var myLineChart = new Chart(ctx, {
                                 type: 'line',
-				  data:{
+				data:{
 				labels: times,
 				datasets: [{
                                 label: "출석률",
@@ -312,7 +335,7 @@
                                 pointBorderWidth: 2,
 				data: datas,
                               }],
-				},
+			    },
                             options: {
                               maintainAspectRatio: false,
                               layout: {
@@ -325,7 +348,7 @@
                               },
                               scales: {
                                 xAxes: [{
-					time: {
+				  time: {
                                     unit: 'time'
                                   },
                                   gridLines: {
@@ -348,7 +371,7 @@
                                       else if (value == 1)
                                         return '부재중';
                                       else if(value == 2)
-                                        return '자리있음';
+                                        return '출석중';
                                     }
                                   },
 
@@ -385,12 +408,118 @@
                       });
                     })
                     </script>
-
-			  
-			  
-			  
-			  
-			  
+		    <script>
+                      $('.student_list').on('click','tr',function(){
+                        var lect_id = localStorage.lect_id;
+                        var student_id = localStorage.student_id;
+                        $.ajax({
+                          url:'http://localhost:5000/tutorLgraph',
+                          method:'GET',
+                          dataType:'json',
+                          data:{
+                            class_id : lect_id,
+                            tutee_id : student_id
+                          },
+                        })
+                        .done(function(json){
+                        var ctx = document.getElementById("myAreaChart");
+                          var time_length = Object.keys(json['time']).length;
+                          var data_length = Object.keys(json['data']).length;
+                          var times = [];
+                          var datas = [];
+                          for(var i=0; i < time_length; i++) {
+                            times.push(`${json['time'][i]}`);
+                            datas.push(`${json['data'][i]}`);
+                          }
+                          var myLineChart = new Chart(ctx, {
+                                type: 'line',
+                                data:{
+                                labels: times,
+                                datasets: [{
+                                label: "출석률",
+                                lineTension: 0.3,
+                                backgroundColor: "rgba(78, 115, 223, 0.05)",
+                                borderColor: "rgba(78, 115, 223, 1)",
+                                pointRadius: 2,
+                                pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                                pointBorderColor: "rgba(78, 115, 223, 1)",
+                                pointHoverRadius: 2,
+                                pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                                pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                                pointHitRadius: 10,
+                                pointBorderWidth: 2,
+                                data: datas,
+                              }],
+                            },
+                            options: {
+                              maintainAspectRatio: false,
+                              layout: {
+                                padding: {
+                                  left: 10,
+                                  right: 25,
+                                  top: 25,
+                                  bottom: 0
+                                }
+                              },
+                              scales: {
+                                xAxes: [{
+                                  time: {
+                                    unit: 'time'
+                                  },
+                                  gridLines: {
+                                    display: false,
+				},
+                                  ticks: {
+                                    minTicksLimit: 5,
+                                    maxTicksLimit: 14
+                                  }
+                                }],
+                                yAxes: [{
+                                  ticks: {
+                                    maxTicksLimit: 3,
+                                    paddingBottem:10,
+                                    // Include a dollar sign in the ticks
+                                    callback: function(value, index, values) {
+                                      if(value == 0)
+                                        return '시작!';
+                                      else if (value == 1)
+                                        return '부재중';
+                                      else if(value == 2)
+                                        return '자리있음';
+                                    }
+                                  },
+                                  gridLines: {
+                                    color: "rgb(234, 236, 244)",
+                                    zeroLineColor: "rgb(234, 236, 244)",
+                                    drawBorder: false,
+                                    borderDash: [2],
+                                    zeroLineBorderDash: [2]
+                                  }
+                                }],
+                              },
+                              legend: {
+                                display: false
+                              },
+                              tooltips: {
+                                backgroundColor: "rgb(255,255,255)",
+                                bodyFontColor: "#858796",
+                                titleMarginBottom: 10,
+                                titleFontColor: '#6e707e',
+				titleFontSize: 14,
+                                borderColor: '#dddfeb',
+                                borderWidth: 1,
+                                xPadding: 15,
+                                yPadding: 15,
+                                displayColors: false,
+                                intersect: false,
+                                mode: 'index',
+                                caretPadding: 10,
+                              }
+                            }
+                          });
+                        })
+                      })
+                    </script>
 		<canvas id="myAreaChart"></canvas>
                   </div>
                 </div>
@@ -403,13 +532,14 @@
                 </div>
             <script>
               $(function(){
+		var lect_id = localStorage.lect_id;
                     $.ajax({
                       dataType:'json',
                       method:'GET',
                       url:'http://192.168.88.140:5000/tutorStudentProcess',
-                      data:{class_id:1},
+                      data:{class_id:lect_id},
                       success: function(json){
-                        var num = Object.keys(json["studentList"]).length;
+                        var num = Object.keys(json).length;
                         for(var i=0;i<num;i++){
                           var addTR = document.createElement('tr');
                           var addTDnum = document.createElement('td');
@@ -417,23 +547,34 @@
                           var addTDname = document.createElement('td');
                           var addTDenga = document.createElement('td');
                           var addTDstatus = document.createElement('td');
-                          addTDnum = `${i+1}`;
-                          addTDimg = `<img style="width:20px;height:20px" src="../static/img/user.png"/>`;
+			  addTR.className = `tr_start_${i}`
+                          addTDnum.innerText = `${i}`
+                          addTDnum.className = 'number'
+                          addTDimg.className = `image`
+  
+			  addTDimg = `<img style="width:20px;height:20px" src="../static/img/user.png"/>`;
                           addTDname= `${json["studentList"][i]['tutee_name']}`;
+			  
+			  addTDname.className = `name`
                           addTDenga = `${json["studentList"][i]['engagement']}`;
-                          addTDstatus=`${json["studentList"][i]['status']}`;
-                          $('#tutee_list > tbody:last').append(
-				  '<tr><td>' + addTDnum + '</td>' +
-				  '<td>' + addTDimg + '</td>' +
-				  '<td>' + addTDname + '</td>' +
-				  '<td>' + addTDenga + '</td>' +
-				  '<td>' + addTDstatus + '</td>');
-                        }
-                      }
-                    });
-                  })
-                </script>
 
+			  addTDenga.className = `enga`
+                          addTDstatus=`${json["studentList"][i]['status']}`;
+
+			  $('tbody').append(addTR);
+                          $(`.tr_start_${i}`).append(addTDnum);
+                          $('.number').append(addTDimg);
+                          $('.image').append(addTDname);
+                          $('.name').append(addTDenga);
+                          $('.enga').append(addTDstatus);
+                          html('<input type="hidden" name="class_id" value=""' +json["studentList"][i]['class_id']+'"></input>"');
+                            }
+                        localStorage.student_id = `${json['studentList'][0]['tutee_id']}`;
+
+			  }
+                        });
+                      })
+                    </script>
 
                 <div class="card-body">
                   <div class="overflow_f">
@@ -484,17 +625,18 @@
 
                     // Pie Chart Example
                     $(function(){
+		    var lect_id =  localStroge.lect_id;
                       $.ajax({
                         url:'http://192.168.88.140:5000/tutorOgraphProcess',
                         method:'GET',
                         dataType:'json',
-                        data:{class_id:1},
+                        data:{class_id:lect_id},
                         })
                         .done(function(json){
                           var datas = [];
-                          datas.push(`${json['my_graph'][4]['pass %']}`);
-			  datas.push(`${json['my_graph'][5]['late %']}`);
-		       	datas.push(`${json['my_graph'][6]['fail %']}`);
+                          datas.push(`${json['my_graph'][4]['pass%']}`);
+			  datas.push(`${json['my_graph'][5]['late%']}`);
+		       	datas.push(`${json['my_graph'][6]['fail%']}`);
                         var ctx = document.getElementById("myPieChart");
                         var myPieChart = new Chart(ctx, {
                           type: 'doughnut',
@@ -539,46 +681,47 @@
                   </div>
                 </div>
 		<div class="pie_table_">
-  <script>
-    $(function(){
-      $.ajax({
-        url:'http://192.168.88.140:5000/tutorOgraphProcess',
-        dataType:'json',
-        method:'GET',
-        data:{class_id:1},
-      })
-      .done(function(json){
-          $('#pie > tbody:last').append(
-              '<tr><th>' + '출석' + '</th>' +
-                '<td>' + `${json["my_graph"][0]["pass"]}` + '</td>' +
-                '<td>' + `${json["my_graph"][4]["pass %"]}` + '%</td></tr>');
-          $('#pie > tbody:last').append(
-              '<tr><th>' + '지각' + '</th>' +
-                '<td>' + `${json["my_graph"][1]["late"]}`+ '</td>' +
-                '<td>' + `${json["my_graph"][5]["late %"]}` + '%</td></tr>');
-          $('#pie > tbody:last').append(
-              '<tr><th>' + '결석' + '</th>' +
-                '<td>' + `${json["my_graph"][2]["fail"]}` + '</td>' +
-                '<td>' + `${json["my_graph"][6]["fail %"]}` + '%</td></tr>');
-          $('#pie > tbody:last').append(
-              '<tr><th>' + '총 인원' + '</th>' +
-                '<td>' + `${json["my_graph"][3]["all"]}` + '</td>' +
-                '<td>' + `${json["my_graph"][7]["all %"]}` + '%</td></tr>');
-        })
-      })
-  </script>
-  <table class="pie_table" id="pie">
-    <thead>
-      <tr>
-        <td></td>
-        <th>인원</th>
-        <th>퍼센트(%)</th>
-      </tr>
-    </thead>
-    <tbody>
-    </tbody>
-  </table>
-</div>
+  		  <script>
+    		   $(function(){
+	     	     var lect_id = localStorage.lect_id;
+      		     $.ajax({
+        		url:'http://192.168.88.140:5000/tutorOgraphProcess',
+        		dataType:'json',
+        		method:'GET',
+	        	data:{class_id:lect_id},
+      			})
+      			.done(function(json){
+          		  $('#pie > tbody:last').append(
+              		  '<tr><th>' + '출석' + '</th>' +
+                	  '<td>' + `${json["my_graph"][0]["pass"]}` + '</td>' +
+                	  '<td>' + `${json["my_graph"][4]["pass%"]}` + '%</td></tr>');
+          		  $('#pie > tbody:last').append(
+              		  '<tr><th>' + '지각' + '</th>' +
+                	  '<td>' + `${json["my_graph"][1]["late"]}`+ '</td>' +
+	                  '<td>' + `${json["my_graph"][5]["late%"]}` + '%</td></tr>');
+          		  $('#pie > tbody:last').append(
+              		  '<tr><th>' + '결석' + '</th>' +
+                 	  '<td>' + `${json["my_graph"][2]["fail"]}` + '</td>' +
+                	  '<td>' + `${json["my_graph"][6]["fail%"]}` + '%</td></tr>');
+          		  $('#pie > tbody:last').append(
+              		  '<tr><th>' + '총 인원' + '</th>' +
+                	  '<td>' + `${json["my_graph"][3]["all"]}` + '</td>' +
+                	  '<td>' + `${json["my_graph"][7]["all%"]}` + '%</td></tr>');
+        		})
+      		       })
+	  </script>
+	  <table class="pie_table" id="pie">
+	    <thead>
+	      <tr>
+	        <td></td>
+	        <th>인원</th>
+       		 <th>퍼센트(%)</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    </tbody>
+	  </table>
+	</div>
 
               </div>
             </div>
