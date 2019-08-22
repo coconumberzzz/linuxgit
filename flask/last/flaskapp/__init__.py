@@ -33,10 +33,6 @@ def tutorStudent():
     else :
         return render_template('index.html')
 
-@app.route("/tutorInfo")
-def tutorInfo():
-    return render_template('tutor_mypage.html')
-
 
 @app.route("/tutorMypageProcess",methods=["POST","GET"])
 #_튜터>강의목록
@@ -197,9 +193,10 @@ def tutorCalendar():
             charset='utf8')
         cursor=db.cursor()
         #튜터>달력
-        
+        class_id=1
+
         query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'pass' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
-        value=(1)
+        value=(class_id)
         cursor.execute(query,value)
         data=(cursor.fetchall())   #출석인원
         datalist=[]
@@ -212,7 +209,7 @@ def tutorCalendar():
 
         query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'late' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
 
-        value=(1)
+        value=(class_id)
         cursor.execute(query,value)
         data2=(cursor.fetchall())   #지각인원
         
@@ -223,7 +220,7 @@ def tutorCalendar():
 
         query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'fail' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
 
-        value=(1)
+        value=(class_id)
         cursor.execute(query,value)
         data3=(cursor.fetchall())   #결석인원
 
@@ -392,15 +389,6 @@ def tutorOgraphProcess():
         db.close()
         return loaded_i
 
-@app.route("/graph",methods=["GET"])
-def graph():
-    datalist=[0,1,2,2,2,1,2,2,0,1]
-    datatime=["9:00","9:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30"]
-
-    dic ={'data':datalist[0:],'time':datatime[0:]} 
-    i = json.dumps(dic)
-    loaded_i=json.loads(i)
-    return loaded_i
 
 @app.route("/tutorLgraphProcess",methods=["POST","GET"])
 #_튜터>평균그래프(각 인원수)
@@ -427,7 +415,6 @@ def tutorLgraphProcess():
     value=(data8,tutee_id,class_id)
     cursor.execute(query,value)
     data12=(cursor.fetchall())
-    print(data12)
     datalist=[]
     class_time_list = []
     pass_time_list = []
