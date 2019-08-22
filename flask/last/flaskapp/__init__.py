@@ -185,6 +185,7 @@ def tutorInfoProcess():
 @app.route("/tutorCalendarProcess",methods=["POST","GET"])
 #_튜터>달력
 def tutorCalendar():
+        class_id=request.args.get("class_id")
         db = pymysql.connect(host='127.0.0.1',
             port=3306,
             user='admin',
@@ -193,7 +194,6 @@ def tutorCalendar():
             charset='utf8')
         cursor=db.cursor()
         #튜터>달력
-        class_id=1
 
         query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'pass' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
         value=(class_id)
