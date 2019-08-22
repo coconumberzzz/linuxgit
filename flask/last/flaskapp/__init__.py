@@ -116,7 +116,7 @@ def tutorStudentProcess():
 
             if key:
               #튜터>학생목록
-                query="SELECT TUTEE_INFO.NAME,ENGAGEMENT,STATUS FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO,TUTEE_INFO WHERE CLASS_INFO.CLASS_ID=%s AND CLASS_INFO.TUTOR_ID=%s AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.TUTEE_ID=TUTEE_INFO.TUTEE_ID AND CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID;"
+                query="SELECT TUTEE_INFO.NAME,ENGAGEMENT,STATUS,TUTEE_INFO.TUTEE_ID FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO,TUTEE_INFO WHERE CLASS_INFO.CLASS_ID=%s AND CLASS_INFO.TUTOR_ID=%s AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.TUTEE_ID=TUTEE_INFO.TUTEE_ID AND CLASS_INFO.CLASS_ID=TUTEE_CLASS_MAPPING.CLASS_ID;"
                 value=(class_id,key)
                 cursor.execute(query,value)
                 data2=(cursor.fetchall())
@@ -125,7 +125,7 @@ def tutorStudentProcess():
 
                 for row in data2:
                     if row :        #튜터마이페이지 > 학생목록
-                        dic={'tutee_name':row[0],'engagement':row[1],'status':row[2]}
+                        dic={'tutee_name':row[0],'engagement':row[1],'status':row[2],'tutee_id':row[3]}
                         datalist.append(dic)
                 DATA={'studentList':datalist}
                 i = json.dumps(DATA)
@@ -253,6 +253,18 @@ def tutorCalendar():
 @app.route("/tutorOgraph",methods=["POST","GET"])
 def tutorOgraph():
     return render_template('tutor_mypage.html')
+
+@app.route("/graph2",methods=["GET"])
+def graph2():
+    passlist=[75]
+    latelist=[20]
+    faillist=[5]
+
+    dic ={'pass':passlist[0:],'late':latelist[0:],'fail':faillist[0:]}
+    i = json.dumps(dic)
+    loaded_i=json.loads(i)
+    return loaded_i
+
 
 @app.route("/tutorOgraphProcess",methods=["POST","GET"])
 #_튜터>출결현황그래프(각 인원수)

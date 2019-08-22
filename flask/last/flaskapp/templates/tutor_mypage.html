@@ -475,6 +475,55 @@
                 <!-- Card Body -->
                 <div class="card-body">
                   <div class="chart-pie pt-4 pb-2">
+                  
+		    <script>
+			    $(function(){
+			    Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+                    Chart.defaults.global.defaultFontColor = '#858796';
+			    })
+
+                    // Pie Chart Example
+                    $(function(){
+                      $.ajax({
+                        url:'http://192.168.88.140:5000/graph2',
+                        method:'GET',
+                        dataType:'json',
+                        data:{class_id:1},
+                        })
+                        .done(function(json){
+                          var datas = [];
+                          datas.push(`${json['pass'][0]}`);
+                          datas.push(`${json['late'][0]}`);
+                          datas.push(`${json['fail'][0]}`);
+                        var ctx = document.getElementById("myPieChart");
+                        var myPieChart = new Chart(ctx, {
+                          type: 'doughnut',
+                          data: {
+                            labels: ["출석", "지각", "결석"],
+                            datasets: [{
+                              data: datas,
+                              backgroundColor: ['#1cc88a', '#eccc68', '#ff6b81'],
+                              hoverBackgroundColor: ['#17a673', '#ffa502', '#ff4757'],
+                              hoverBorderColor: "rgba(234, 236, 244, 1)",
+                            }],
+                          },
+                          options: {
+                            maintainAspectRatio: false,
+                            tooltips: {
+                              backgroundColor: "rgb(255,255,255)",
+                              bodyFontColor: "#858796",
+                              borderColor: '#dddfeb',
+                              borderWidth: 1,
+                              xPadding: 15,
+                              yPadding: 15,
+                              displayColors: false,
+                            },
+                            cutoutPercentage: 80,
+                          },
+                        });
+                      });
+                    })
+                    </script>
                     <canvas id="myPieChart"></canvas>
                   </div>
                   <div class="mt-4 text-center small">
@@ -499,26 +548,6 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <th>출석</th>
-                        <td>50</td>
-                        <td>50%</td>
-                      </tr>
-                      <tr>
-                        <th>지각</th>
-                        <td>15</td>
-                        <td>15%</td>
-                      </tr>
-                      <tr>
-                        <th>결석</th>
-                        <td>35</td>
-                        <td>35%</td>
-                      </tr>
-                      <tr>
-                        <th>총 인원</th>
-                        <td>100</td>
-                        <td>100%</td>
-                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -607,7 +636,6 @@
   <script src="../static/vendor/chart.js/Chart.min.js"></script>
 
   <!-- Page level custom scripts -->
-  <script src="../static/js/demo/chart-pie-demo.js"></script>
 
 </body>
 
