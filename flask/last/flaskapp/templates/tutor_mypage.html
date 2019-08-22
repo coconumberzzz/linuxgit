@@ -45,7 +45,7 @@
       <!-- Sidebar - Brand -->
       <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
         <div class="sidebar-brand-icon rotate-n-0">
-          <img src="../static/img/withelogo.png" alt="..." style="width:65px;">
+          <img src="../../static/img/withelogo.png" alt="..." style="width:65px;">
         </div>
         <div class="sidebar-brand-text mx-3">출석지킴이</div>
       </a>
@@ -112,7 +112,7 @@
               $.ajax({
                 url:"http://192.168.88.140:5000/tutorMypageProcess",
                 dataType:"json",
-                method:'POST',
+                method:'GET',
                 success : function(json){
 			var json_length=Object.keys(json['class_info']).length;
 			for(var i=0; i < json_length; i++){
@@ -121,9 +121,9 @@
                   		addA.href = `http://192.168.88.140:5000/tutorMypage?class_id=${json['class_info'][i]['ID']}`
 					  addA.innerText = `${json['class_info'][i]['NAME']}`
 				$(".start").after(addA);
-			$(document).html('<input type="hidden" name="class_id" value=""'+json["class_info"][i]['class_id']+'"></input>"');
+			$(document).html('<input type="hidden" name="class_id" value=""'+json["class_info"][i]['ID']+'"></input>"');
                                          }
-                       localStorage.lect_id = `${json['class_info'][0]['class_id']}`;
+                      localStorage.setItem("lect_id",`${json['class_info'][0]['ID']}`);
                     }
                   });
                 })
@@ -131,7 +131,7 @@
 	    <script>
               $(function(){
                   $('.collapse-item').on('click','a',function(){
-                    lect_id = $('.class_id').val();
+                    localStorage.setItem("lect_id ",$('.class_id').val());
                   })
               });
             </script>
@@ -167,7 +167,7 @@
           <h1 class="h3 mb-0 text-gray-800" name="class_name"> 강의 이름 / 분반</h1>
           <script>
             $(function(){
-              var lect_id = localStorage.lect_id;
+              var lect_id = localStorage.getItem('lect_id');
               $.ajax({
                 url:'http://192.168.88.140:5000/tutorInfoProcess',
                 method:'GET',
@@ -260,7 +260,7 @@
                   <div class="dropdown no-arrow">
                   </div>
                 </div>
-                <!-- Card Body -->		
+                <!-- Card Body -->
 		<div class="card-body">
                   <div class="chart-area">
 		<script>
@@ -296,8 +296,8 @@
                     })
                     // Area Chart Example
                     $(function(){
-                      var lect_id = localStorage.lect_id;
-                      var student_id = localStorage.student_id;
+                      var lect_id = localStorage.getItem('lect_id');
+                      var student_id = localStorage.getItem('student_id');
                       $.ajax({
 	  		url:'http://192.168.88.140:5000/tutorLgraphProcess',
                         dataType:'json',
@@ -308,13 +308,13 @@
                         },
                         success : function(json){
                           var ctx = document.getElementById("myAreaChart");
-			  var time_length = Object.keys(json['time']).length;
-			  var data_length = Object.keys(json['data']).length;
+			  var time_length = Object.keys(json['class_time']).length;
+			  var data_length = Object.keys(json['pass_time']).length;
 			  var times = [];
 			  var datas = [];
 			  for(var i=0; i < time_length; i++) {
-			  	times.push(`${json['time'][i]}`);
-				datas.push(`${json['data'][i]}`);
+			  	times.push(`${json['class_time'][i]}`);
+				datas.push(`${json['pass_time'][i]}`);
 		  	  }
                           var myLineChart = new Chart(ctx, {
                                 type: 'line',
@@ -410,10 +410,10 @@
                     </script>
 		    <script>
                       $('.student_list').on('click','tr',function(){
-                        var lect_id = localStorage.lect_id;
-                        var student_id = localStorage.student_id;
+                        var lect_id = localStorage.getItem('lect_id');
+                        var student_id = localStorage.getItem('student_id');
                         $.ajax({
-                          url:'http://localhost:5000/tutorLgraph',
+                          url:'http://192.168.88.140:5000/tutorLgraphProcess',
                           method:'GET',
                           dataType:'json',
                           data:{
@@ -423,13 +423,13 @@
                         })
                         .done(function(json){
                         var ctx = document.getElementById("myAreaChart");
-                          var time_length = Object.keys(json['time']).length;
-                          var data_length = Object.keys(json['data']).length;
+                          var time_length = Object.keys(json['class_time']).length;
+                          var data_length = Object.keys(json['pass_time']).length;
                           var times = [];
                           var datas = [];
                           for(var i=0; i < time_length; i++) {
-                            times.push(`${json['time'][i]}`);
-                            datas.push(`${json['data'][i]}`);
+                            times.push(`${json['class_time'][i]}`);
+                            datas.push(`${json['pass_time'][i]}`);
                           }
                           var myLineChart = new Chart(ctx, {
                                 type: 'line',
@@ -532,7 +532,7 @@
                 </div>
             <script>
               $(function(){
-		var lect_id = localStorage.lect_id;
+		var lect_id = localStorage.getItem('lect_id');
                     $.ajax({
                       dataType:'json',
                       method:'GET',
@@ -547,29 +547,29 @@
                           var addTDname = document.createElement('td');
                           var addTDenga = document.createElement('td');
                           var addTDstatus = document.createElement('td');
-			  addTR.className = `tr_start_${i}`
+			                    addTR.className = `tr_start_${i}`
                           addTDnum.innerText = `${i}`
                           addTDnum.className = 'number'
-                          addTDimg.className = `image`
-  
-			  addTDimg = `<img style="width:20px;height:20px" src="../static/img/user.png"/>`;
+                          addTDimg.className = 'image'
+
+			                    addTDimg = `<img style="width:20px;height:20px" src="../static/img/user.png"/>`;
                           addTDname= `${json["studentList"][i]['tutee_name']}`;
-			  
-			  addTDname.className = `name`
+
+			                    addTDname.className = `name`
                           addTDenga = `${json["studentList"][i]['engagement']}`;
 
-			  addTDenga.className = `enga`
+			                    addTDenga.className = `enga`
                           addTDstatus=`${json["studentList"][i]['status']}`;
 
-			  $('tbody').append(addTR);
+			                    $('tbody').append(addTR);
                           $(`.tr_start_${i}`).append(addTDnum);
                           $('.number').append(addTDimg);
                           $('.image').append(addTDname);
                           $('.name').append(addTDenga);
                           $('.enga').append(addTDstatus);
-                          html('<input type="hidden" name="class_id" value=""' +json["studentList"][i]['class_id']+'"></input>"');
+                          html('<input type="hidden" name="class_id" value=""' +json["studentList"][i]['tutee_id']+'"></input>"');
                             }
-                        localStorage.student_id = `${json['studentList'][0]['tutee_id']}`;
+                        localStorage.setItem('student_id', `${json['studentList'][0]['tutee_id']}`);
 
 			  }
                         });
@@ -616,7 +616,7 @@
                 <!-- Card Body -->
                 <div class="card-body">
                   <div class="chart-pie pt-4 pb-2">
-                  
+
 		    <script>
 			    $(function(){
 			    Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
@@ -625,7 +625,7 @@
 
                     // Pie Chart Example
                     $(function(){
-		    var lect_id =  localStroge.lect_id;
+		    var lect_id = localStroge.getItem('lect_id');
                       $.ajax({
                         url:'http://192.168.88.140:5000/tutorOgraphProcess',
                         method:'GET',
@@ -683,7 +683,7 @@
 		<div class="pie_table_">
   		  <script>
     		   $(function(){
-	     	     var lect_id = localStorage.lect_id;
+	     	     var lect_id = localStorage.getItem('lect_id');
       		     $.ajax({
         		url:'http://192.168.88.140:5000/tutorOgraphProcess',
         		dataType:'json',

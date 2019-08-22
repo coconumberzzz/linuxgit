@@ -198,7 +198,7 @@ def tutorCalendar():
         cursor=db.cursor()
         #튜터>달력
         
-        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'pass~~' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
+        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'pass' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
         value=(class_id)
         cursor.execute(query,value)
         data=(cursor.fetchall())   #출석인원
@@ -213,7 +213,7 @@ def tutorCalendar():
         loaded_i = json.loads(i)
 
 
-        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'LATE' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
+        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'late' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
 
         value=(class_id)
         cursor.execute(query,value)
@@ -228,7 +228,7 @@ def tutorCalendar():
         i = json.dumps(DATA)
         loaded_i = json.loads(i)
 
-        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'FAIL' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
+        query="SELECT COUNT(STATUS),DATE FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'fail' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=1 AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID GROUP BY DATE;"
 
         value=(class_id)
         cursor.execute(query,value)
@@ -267,7 +267,7 @@ def tutorOgraphProcess():
         data8=(cursor.fetchall())
 
         #튜터>출결현황그래프(각 인원수)
-        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'pass~~' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND ATTENDANCE.DATE=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID;"
+        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'pass' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND ATTENDANCE.DATE=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID;"
         value=(class_id,data8)
         cursor.execute(query,value)
         data4=(cursor.fetchall())   #출석인원
@@ -284,7 +284,7 @@ def tutorOgraphProcess():
         loaded_i=json.loads(i)
 
 
-        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'LATE' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND ATTENDANCE.DATE=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID;"
+        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'late' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND ATTENDANCE.DATE=%s AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID;"
         value=(class_id,data8)
         cursor.execute(query,value)
         data5=(cursor.fetchall())
@@ -300,7 +300,7 @@ def tutorOgraphProcess():
         loaded_i=json.loads(i)
 
 
-        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'FAIL' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND ATTENDANCE.DATE=%s;"
+        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING,CLASS_INFO WHERE STATUS = 'fail' AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=CLASS_INFO.CLASS_ID AND TUTEE_CLASS_MAPPING.CLASS_ID=%s AND ATTENDANCE.DATE=%s;"
         value=(class_id,data8)
         cursor.execute(query,value)
         data6=(cursor.fetchall())
@@ -332,7 +332,7 @@ def tutorOgraphProcess():
             
 
         #출석, 지각, 결석 퍼센트 쿼리문
-        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING WHERE TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND ATTENDANCE.DATE=%s AND ATTENDANCE.STATUS='pass~~';"
+        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING WHERE TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND ATTENDANCE.DATE=%s AND ATTENDANCE.STATUS='pass';"
         value=(class_id,data8)
         cursor.execute(query,value)
         data9=(cursor.fetchall())
@@ -342,14 +342,14 @@ def tutorOgraphProcess():
         percent=round((float)((data4/data7)*100),2)
         for row in data9:  
             if row :        #튜터마이페이지 > 출결현황(출석퍼센트)
-                dic={'pass %':percent}
+                dic={'pass%':percent}
                 datalist.append(dic)
         DATA={'my_graph':datalist}
         i=json.dumps(DATA)
         loaded_i=json.loads(i)
 
 
-        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING WHERE TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND ATTENDANCE.DATE=%s AND ATTENDANCE.STATUS='LATE';"
+        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING WHERE TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND ATTENDANCE.DATE=%s AND ATTENDANCE.STATUS='late';"
         value=(class_id,data8)
         cursor.execute(query,value)
         data10=(cursor.fetchall())
@@ -359,13 +359,13 @@ def tutorOgraphProcess():
         percent2=round((float)((data5/data7)*100),2)
         for row in data10:  
             if row :        #튜터마이페이지 > 출결현황(지각퍼센트)
-                dic={'late %':percent2}
+                dic={'late%':percent2}
                 datalist.append(dic)
         DATA={'my_graph':datalist}
         i=json.dumps(DATA)
         loaded_i=json.loads(i)
 
-        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING WHERE TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND ATTENDANCE.DATE=%s AND ATTENDANCE.STATUS='FAIL';"
+        query = "SELECT COUNT(STATUS) FROM ATTENDANCE,TUTEE_CLASS_MAPPING WHERE TUTEE_CLASS_MAPPING.CLASS_ID=%s AND TUTEE_CLASS_MAPPING.MAPPING_ID=ATTENDANCE.MAPPING_ID AND ATTENDANCE.DATE=%s AND ATTENDANCE.STATUS='fail';"
         value=(class_id,data8)
         cursor.execute(query,value)
         data11=(cursor.fetchall())
@@ -375,7 +375,7 @@ def tutorOgraphProcess():
         percent3=round((float)((data6/data7)*100),2)
         for row in data11:
             if row :        #튜터마이페이지 > 출결현황(결석퍼센트)
-                dic={'fail %':percent3}
+                dic={'fail%':percent3}
                 datalist.append(dic)
         DATA={'my_graph':datalist}
         i = json.dumps(DATA)
@@ -392,7 +392,7 @@ def tutorOgraphProcess():
         percent4=round((float)((data4+data5+data6)/data7)*100,2)
         for row in data13:
             if row :        #튜터마이페이지 > 출결현황(총인원퍼센트)
-                dic={'all %':percent4}
+                dic={'all%':percent4}
                 datalist.append(dic)
         DATA={'my_graph':datalist}
         i = json.dumps(DATA)
